@@ -1,39 +1,22 @@
-
-import time
-import os
 import cfbd
-from cfbd.rest import ApiException
-from pprint import pprint
+from team import Team
 
-# Defining the host is optional and defaults to https://api.collegefootballdata.com
-# See configuration.py for a list of all supported configuration parameters.
-configuration = cfbd.Configuration(
-    host = "https://api.collegefootballdata.com"
-)
+def test():
+    configuration = cfbd.Configuration(
+        access_token = 'h1MAIiVr9gx/02m9CbWjbQp9kPld43ZrzGfGH9MWLWegl9dqq3pCZQqRWmBZc1/W'
+    )
 
-# The client must configure the authentication and authorization parameters
-# in accordance with the API server security policy.
-# Examples for each auth method are provided below, use the example that
-# satisfies your auth use case.
-
-# Configure Bearer authorization: apiKey
-configuration = cfbd.Configuration(
-    access_token = os.environ["BEARER_TOKEN"]
-)
-
-
-# Enter a context with an instance of the API client
-with cfbd.ApiClient(configuration) as api_client:
-    # Create an instance of the API class
-    api_instance = cfbd.AdjustedMetricsApi(api_client)
-    year = 56 # int | Optional year filter (optional)
-    team = 'team_example' # str | Optional team filter (optional)
-    conference = 'conference_example' # str | Optional conference abbreviation filter (optional)
-    position = 'position_example' # str | Optional position abbreviation filter (optional)
-
-    try:
-        api_response = api_instance.get_adjusted_player_passing_stats(year=year, team=team, conference=conference, position=position)
-        print("The response of AdjustedMetricsApi->get_adjusted_player_passing_stats:\n")
-        pprint(api_response)
-    except ApiException as e:
-        print("Exception when calling AdjustedMetricsApi->get_adjusted_player_passing_stats: %s\n" % e)
+    with cfbd.ApiClient(configuration) as api_client:
+        api_instance = cfbd.TeamsApi(api_client)
+        #games = api_instance.get_games(year=2025)
+        teams = api_instance.get_teams()
+        fbs_teams = [team for team in teams if team.classification == 'fbs']
+        print(len(fbs_teams))
+        teams_list = []
+        for team in fbs_teams:
+            print(team)
+            t = Team(name=team.school, short=team.abbreviation, conference=team.conference, year_founded=team.location.construction_year)
+            teams_list.append(t)
+        for team in teams_list:
+            print(team.name, team.year_founded)
+    return teams_list
